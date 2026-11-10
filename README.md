@@ -1,4 +1,4 @@
-# rpmm-explorer
+# rpmm2mztabm
 
 RIKEN Plant Metabolome Metadatabase のデータと解析成果物を管理します。
 

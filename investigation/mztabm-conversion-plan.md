@@ -16,7 +16,7 @@ they resolve physically to `projects/RPMM0003/data/AnalysedDataset/MetMat_abs.tx
 Re-run the existing prototype from any working directory with:
 
 ```sh
-Rscript /absolute/path/to/rpmm-explorer/investigation/mztabm/proto_rpmm0003.R --output /private/tmp/RPMM0003_MetMat_abs.mztab
+Rscript /absolute/path/to/rpmm2mztabm/investigation/mztabm/proto_rpmm0003.R --output /private/tmp/RPMM0003_MetMat_abs.mztab
 ```
 
 It accepts `--projects-root` and `--validator` (or `RPMM_MZTABM_VALIDATOR`). The
