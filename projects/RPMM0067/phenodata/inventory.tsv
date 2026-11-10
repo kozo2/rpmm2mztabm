@@ -1,0 +1,2 @@
+project	source_path	source_sha256	columns	current_md5	data_records	download_url	manifest_md5	manifest_md5_matches	repository_path	row_kind_counts	source_file_iri
+RPMM0067	RPMM0067/AnalysedDataset/phenodata.csv	faeeb00159ca64b075ab3d2cc54823924356b1d2361222527da0f00198e19db0	14	45dd2232b91ab259396dec6ffcfb7f3f	54	http://metabobank.riken.jp/data/RPMM0067/AnalysedDataset/phenodata.csv	45dd2232b91ab259396dec6ffcfb7f3f	True	projects/RPMM0067/data/AnalysedDataset/phenodata.csv	"{""experimental_record"":54}"	http://metadb.riken.jp/db/plantMetabolomics/0.1/RawDataFileList/RPMM0067

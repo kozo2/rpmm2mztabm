@@ -1,0 +1,12 @@
+{
+  "validation": "passed",
+  "run_working_directory": "/private/tmp",
+  "official_validator_messages": 0,
+  "roundtrip_abundance_equal": true,
+  "roundtrip_smf_dimensions": [
+    39,
+    23
+  ],
+  "script_sha256": "bfeee987a6da6da6c739622e74f1d25e1689519e71a1c8d790b62fb6b4af2828",
+  "prototype_output_sha256": "f24ec49a018766866040f9209a26c8937387615c5313eddf3547c5350012710c"
+}

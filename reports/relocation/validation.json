@@ -1,0 +1,17 @@
+{
+  "validation": "passed",
+  "moved_files": 533,
+  "preservation_checks": {
+    "byte_identity": 529,
+    "table_report_paths": 1,
+    "export_validation_metrics": 1,
+    "inventory_with_physical_paths": 1,
+    "qa_invariants": 1
+  },
+  "project_folders": 47,
+  "annotation_cells_checked": 26997,
+  "project_annotation_exports_checked": 31,
+  "regenerated_table_files_byte_identical": 212,
+  "logical_cell_and_mapping_ids": "unchanged (complete annotation TSV byte identity)",
+  "verifier_sha256": "ed792f16aaf276740e0cf5630e1beb1de9b7b3b0c3087a1cc32568bf0ba37fb1"
+}

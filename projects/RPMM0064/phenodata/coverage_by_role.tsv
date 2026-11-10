@@ -1,0 +1,11 @@
+semantic_role	cells	unique_value_mappings	cells_needing_review	cells_with_assigned_term	cells_with_assigned_unit	values_with_assigned_term	values_with_assigned_unit
+boolean	72	2	0	0	0	0	0
+count	72	50	0	0	0	0	0
+date	72	1	0	0	0	0	0
+file_reference	72	72	0	0	0	0	0
+genotype	144	3	0	0	0	0	0
+identifier	432	301	0	0	0	0	0
+order	72	72	0	0	0	0	0
+organism	72	1	0	72	0	1	0
+quantity	216	42	0	0	216	0	42
+text	144	144	0	0	0	0	0

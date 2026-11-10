@@ -2,10 +2,12 @@
 
 - follows redirects
 - verifies the MD5 recorded in the endpoint against the bytes received
-- preserves the remote directory structure under ./downloads/
+- stores each remote project under projects/RPMM####/data/
+- preserves data/RPMM####/... as the logical manifest path
 - writes manifest.csv summarising every file
 """
 
+import argparse
 import concurrent.futures as cf
 import csv
 import hashlib
@@ -17,8 +19,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = (HERE / "downloads").resolve()
-ROOT.mkdir(exist_ok=True)
+ROOT = (HERE.parent / "projects").resolve()
 
 # The endpoint records "AraMetLeaves.Rdata" but the server only serves ".RData".
 URL_FIXES = {
@@ -27,14 +28,23 @@ URL_FIXES = {
 }
 
 
-def local_path(url):
-    """Map a URL to a safe path under ROOT."""
+def logical_path(url):
+    """Keep the original remote data/RPMM####/... identity in the manifest."""
     path = urllib.parse.unquote(urllib.parse.urlparse(url).path)
     path = path.rstrip()                      # drops the stray trailing space
-    rel = path.lstrip("/")
-    target = (ROOT / rel).resolve()
+    return path.lstrip("/")
+
+
+def local_path(url):
+    """Map data/RPMM####/... to projects/RPMM####/data/... safely."""
+    parts = Path(logical_path(url)).parts
+    if (len(parts) < 3 or parts[0] != "data" or not parts[1].startswith("RPMM")
+            or not parts[1][4:].isdigit()):
+        raise ValueError(f"unsupported RPMM download path: {url}")
+    target = (ROOT / parts[1] / "data" / Path(*parts[2:])).resolve()
     if not str(target).startswith(str(ROOT) + os.sep):
         raise ValueError(f"refusing path outside download root: {target}")
+    target.relative_to((ROOT / parts[1] / "data").resolve())
     return target
 
 
@@ -44,7 +54,7 @@ def fetch(row):
     dest = local_path(url)
     dest.parent.mkdir(parents=True, exist_ok=True)
     out = {
-        "url": url, "requested": real, "local_path": str(dest.relative_to(ROOT)),
+        **row, "requested": real, "local_path": logical_path(url),
         "status": "", "bytes": 0, "md5_expected": row.get("md5", ""),
         "md5_actual": "", "md5_match": "", "error": "",
     }
@@ -78,7 +88,17 @@ def fetch(row):
 
 
 def main():
-    rows = list(csv.DictReader(open(HERE / "downloadurls_final4.tsv", encoding="utf-8"), delimiter="\t"))
+    global ROOT
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--projects-root", type=Path, default=HERE.parent / "projects")
+    parser.add_argument("--urls", type=Path, default=HERE / "downloadurls_final4.tsv")
+    parser.add_argument("--manifest", type=Path, default=HERE / "manifest.csv")
+    args = parser.parse_args()
+    ROOT = args.projects_root.resolve()
+    with args.urls.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    if not rows:
+        parser.error("download URL input is empty")
     print(f"rows: {len(rows)}  ->  {ROOT}", flush=True)
     results = []
     with cf.ThreadPoolExecutor(max_workers=6) as ex:
@@ -88,7 +108,8 @@ def main():
                 ok = sum(1 for r in results if r["status"] == "ok")
                 print(f"  [{i}/{len(rows)}] ok={ok}", flush=True)
 
-    with open(HERE / "manifest.csv", "w", newline="", encoding="utf-8") as fh:
+    args.manifest.parent.mkdir(parents=True, exist_ok=True)
+    with args.manifest.open("w", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=list(results[0].keys()))
         w.writeheader()
         w.writerows(results)
@@ -101,9 +122,9 @@ def main():
     print(f"bytes: {sum(r['bytes'] for r in ok):,}")
     print(f"md5 matched: {len(match)}  mismatched: {len(mismatch)}")
     for r in bad:
-        print(f"  FAIL {r['status']} {r['url']} {r['error'][:80]}")
+        print(f"  FAIL {r['status']} {r['downloadURL']} {r['error'][:80]}")
     for r in mismatch:
-        print(f"  MISMATCH {r['url']} expected={r['md5_expected']} got={r['md5_actual']}")
+        print(f"  MISMATCH {r['downloadURL']} expected={r['md5_expected']} got={r['md5_actual']}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,25 @@
+{
+  "project": "RPMM0041",
+  "aggregate_report": "../../../reports/phenodata/qa_report.json",
+  "files": 1,
+  "source_cells": 80,
+  "source_records": 20,
+  "source_column_instances": 4,
+  "unique_value_mappings": 29,
+  "rule_file_sha256": {
+    "pipeline.py": "89c8429f1cc5e28637052457dff0f0e68c824f36ec2106e18a5da49cacc03536",
+    "columns.py": "109f9dd4a6a2315db2c666f873feef5c6d446b680e366dc7f31aeace5ae5f2eb",
+    "values.py": "0f002f88b5f4b914b5b85d698613bd2ac71a2fb86144d463955cb399d1d34175",
+    "catalog.py": "653fe6a8aef20b49c64651aa70ff5ea913f94e5dcf6cacd4f1a5df8537953653",
+    "provenance.py": "0f41d38bb6a3ff10f226d0e44a77337e397b912382dccfd6109c421df1e55eae"
+  },
+  "catalog_file_sha256": {
+    "ontology_terms.json": "a885ea5f38f6a8f987c4d89ca2068d50544a1cc9ce72a70e5118f088471ec279",
+    "ontology_sources.json": "7fe7bc6da75fbe925fd89253fb3387d10f74d032154a66bbf793b1d11988d51c"
+  },
+  "evidence_file_sha256": {
+    "projects.json": "d6e7967ce9ba29600fb915d593ccac64fa95398c008a4caeaa79ef9572d22712",
+    "manifest.csv": "2f56915ff7d05995628dccc96ee77ae71183a8c499d9b49acd017797d3df2f43",
+    "phenodata_ontology/data/rdf_discovery.json": "3f5d0e00bb82961930c713500f05c6b84fabb7fc79ba69c4e2497ae71427ab2d"
+  }
+}

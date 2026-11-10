@@ -1,0 +1,6 @@
+# Reproduces all 106 original table pairs (Arrow writer version included).
+pyarrow==26.0.0
+tomli-w==1.2.0
+openpyxl==3.1.5
+et-xmlfile==2.0.0
+xlrd==2.0.2

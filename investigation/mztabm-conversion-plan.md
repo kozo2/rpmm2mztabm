@@ -1,16 +1,35 @@
-# Plan: Convert `investigation/downloads/data` (RPMM) to mzTab-M 2.1 with RmzTabM
+# Plan: Convert `projects/<RPMM_ID>/data` (RPMM) to mzTab-M 2.1 with RmzTabM
 
 Status: **plan, feasibility verified** — the reference implementation
 [`mztabm/proto_rpmm0003.R`](mztabm/proto_rpmm0003.R) already produces a file that passes
 the official jmztabm validator with **0 errors / 0 warnings / 0 messages** and round-trips
 with identical abundance values.
 
+
+Current repository layout (relocated 2026-11-10): source files are in
+`projects/RPMM####/data/`; project artifacts are adjacent in `tables/`,
+`phenodata/`, and `mztabm/`. Cross-project reports live in `reports/`. The
+prototype and conversion source code remain in `investigation/`. Source keys
+such as `RPMM0003/AnalysedDataset/MetMat_abs.txt` remain stable logical identifiers;
+they resolve physically to `projects/RPMM0003/data/AnalysedDataset/MetMat_abs.txt`.
+
+Re-run the existing prototype from any working directory with:
+
+```sh
+Rscript /absolute/path/to/rpmm-explorer/investigation/mztabm/proto_rpmm0003.R --output /private/tmp/RPMM0003_MetMat_abs.mztab
+```
+
+It accepts `--projects-root` and `--validator` (or `RPMM_MZTABM_VALIDATOR`). The
+reported R/package feasibility below records the original investigation; install
+those dependencies before re-running it. No mzTab-M output is regenerated merely
+by relocating the files.
+
 ---
 
 ## 1. Goal and scope
 
 Convert the downloaded RPMM (RIKEN Plant Metabolome Metadatabase) analysed datasets in
-`investigation/downloads/data/` into valid **mzTab-M 2.1.0** files using the
+`projects/<RPMM_ID>/data/` into valid **mzTab-M 2.1.0** files using the
 **RmzTabM** package in the local R environment.
 
 In scope:
@@ -148,9 +167,9 @@ investigation/mztabm/
                           #   matrix->phenodata pairing, overrides
   run_conversion.R         # batch driver; skips completed, collects failures
 Output:
-  investigation/downloads/mztabm/<RPMM_ID>/<RPMM_ID>_<MatrixName>.mztab
-  investigation/downloads/mztabm/QA-report.tsv          # per-file validator status + counts
-  investigation/downloads/mztabm/conversion-errors.log  # per-file exception + reason
+  projects/<RPMM_ID>/mztabm/<RPMM_ID>_<MatrixName>.mztab
+  reports/mztabm/QA-report.tsv          # per-file validator status + counts
+  reports/mztabm/conversion-errors.log  # per-file exception + reason
 ```
 
 Per file pipeline: detect shape → read matrix + phenodata (+ MSP) → build SE for MTD →
@@ -210,7 +229,7 @@ Estimated total: ~3–4 working days after plan approval.
 ## 9. Definition of done
 
 - Every convertible matrix (target: all ~60) has an mzTab-M 2.1.0 file under
-  `investigation/downloads/mztabm/`.
+  `projects/<RPMM_ID>/mztabm/`.
 - `QA-report.tsv`: 0 validator errors per emitted file; abundance round-trip equality.
 - Unconverted files explicitly listed with reasons in `conversion-errors.log`.
 - One representative file per shape family manually reviewed.

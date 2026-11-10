@@ -1,7 +1,7 @@
 # PMM File Download Report
 
 **Source list:** [`downloadurls_final4.txt`](downloadurls_final4.txt) — 299 URLs (after excluding `RawDataset`, `DropMet`, `/ABF/`, `/MTBLS45/`, `/StandardMixtures/`, `EachBatch_raw.zip`)
-**Destination:** [`downloads/`](downloads/) — remote directory structure preserved
+**Current destination:** [`../projects/`](../projects/) — `RPMM####/data/` 内に元の内部ディレクトリ構造を保持。取得時の論理パス `data/RPMM####/...` はmanifest内で維持しています。
 **Manifest:** [`manifest.csv`](manifest.csv)
 **Date:** 2026-10-15
 
@@ -57,10 +57,11 @@ only the endpoint's hash assignments are transposed.
 ## Reproducing
 
 ```bash
-cd investigation
-../.venv-sparql/bin/python head_scan.py     # sizes / reachability
-../.venv-sparql/bin/python download_all.py  # download + verify (6 threads)
+python3 investigation/download_all.py     # download + verify (6 threads)
 ```
 
 `download_all.py` folds in the `.Rdata` → `.RData` fix via its `URL_FIXES` map and validates
-the destination path stays inside `downloads/` before writing.
+the destination path stays inside the selected `projects/RPMM####/data/` folder before writing.
+
+上記の件数と検証結果は取得当時の記録です。再配置後の実ファイル対応とハッシュは
+[`../reports/relocation/manifest.json`](../reports/relocation/manifest.json) に保存しています。

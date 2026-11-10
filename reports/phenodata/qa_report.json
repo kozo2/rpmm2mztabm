@@ -1,0 +1,173 @@
+{
+  "validation": "passed",
+  "files": 39,
+  "projects": 31,
+  "source_records": 2606,
+  "nonempty_records": 2602,
+  "source_column_instances": 391,
+  "distinct_raw_headers": 165,
+  "source_cells": 26997,
+  "unique_value_mappings": 11784,
+  "checks": [
+    "every source record/column/cell represented",
+    "unique cell identity",
+    "raw values preserved",
+    "mapping expansion is complete",
+    "input hashes unchanged"
+  ],
+  "generated_at_utc": "2026-11-10T07:31:00.732551+00:00",
+  "python_version": "3.9.6",
+  "scope_projects": "all matching RPMM projects",
+  "rule_file_sha256": {
+    "pipeline.py": "89c8429f1cc5e28637052457dff0f0e68c824f36ec2106e18a5da49cacc03536",
+    "columns.py": "109f9dd4a6a2315db2c666f873feef5c6d446b680e366dc7f31aeace5ae5f2eb",
+    "values.py": "0f002f88b5f4b914b5b85d698613bd2ac71a2fb86144d463955cb399d1d34175",
+    "catalog.py": "653fe6a8aef20b49c64651aa70ff5ea913f94e5dcf6cacd4f1a5df8537953653",
+    "provenance.py": "0f41d38bb6a3ff10f226d0e44a77337e397b912382dccfd6109c421df1e55eae"
+  },
+  "catalog_file_sha256": {
+    "ontology_terms.json": "a885ea5f38f6a8f987c4d89ca2068d50544a1cc9ce72a70e5118f088471ec279",
+    "ontology_sources.json": "7fe7bc6da75fbe925fd89253fb3387d10f74d032154a66bbf793b1d11988d51c"
+  },
+  "evidence_file_sha256": {
+    "projects.json": "d6e7967ce9ba29600fb915d593ccac64fa95398c008a4caeaa79ef9572d22712",
+    "manifest.csv": "2f56915ff7d05995628dccc96ee77ae71183a8c499d9b49acd017797d3df2f43",
+    "phenodata_ontology/data/rdf_discovery.json": "3f5d0e00bb82961930c713500f05c6b84fabb7fc79ba69c4e2497ae71427ab2d"
+  },
+  "rdf_discovery_status": "unavailable",
+  "rdf_discovery_limitation": "No sample-level RDF annotations were reused; source CSV evidence is used instead",
+  "cell_status_counts": {
+    "local": 14671,
+    "accepted": 7567,
+    "needs_review": 3627,
+    "missing": 1051,
+    "not_applicable": 81
+  },
+  "cell_kind_counts": {
+    "identifier": 12767,
+    "quantity": 3489,
+    "text": 2933,
+    "integer": 2491,
+    "missing": 1051,
+    "ontology_term": 3807,
+    "date": 222,
+    "boolean": 237
+  },
+  "column_status_counts": {
+    "local": 234,
+    "accepted": 121,
+    "needs_review": 36
+  },
+  "value_status_counts": {
+    "local": 8884,
+    "accepted": 2313,
+    "needs_review": 542,
+    "missing": 42,
+    "not_applicable": 3
+  },
+  "row_kind_counts": {
+    "reference_material": 15,
+    "experimental_record": 2481,
+    "standard_material": 106,
+    "empty": 4
+  },
+  "curation_items": 611,
+  "cells_with_assigned_term": 2362,
+  "cells_with_assigned_unit": 2081,
+  "columns_with_assigned_term": 143,
+  "project_exports": {
+    "RPMM0003": {
+      "directory": "../../projects/RPMM0003/phenodata"
+    },
+    "RPMM0004": {
+      "directory": "../../projects/RPMM0004/phenodata"
+    },
+    "RPMM0010": {
+      "directory": "../../projects/RPMM0010/phenodata"
+    },
+    "RPMM0012": {
+      "directory": "../../projects/RPMM0012/phenodata"
+    },
+    "RPMM0017": {
+      "directory": "../../projects/RPMM0017/phenodata"
+    },
+    "RPMM0019": {
+      "directory": "../../projects/RPMM0019/phenodata"
+    },
+    "RPMM0020": {
+      "directory": "../../projects/RPMM0020/phenodata"
+    },
+    "RPMM0023": {
+      "directory": "../../projects/RPMM0023/phenodata"
+    },
+    "RPMM0026": {
+      "directory": "../../projects/RPMM0026/phenodata"
+    },
+    "RPMM0027": {
+      "directory": "../../projects/RPMM0027/phenodata"
+    },
+    "RPMM0028": {
+      "directory": "../../projects/RPMM0028/phenodata"
+    },
+    "RPMM0029": {
+      "directory": "../../projects/RPMM0029/phenodata"
+    },
+    "RPMM0032": {
+      "directory": "../../projects/RPMM0032/phenodata"
+    },
+    "RPMM0034": {
+      "directory": "../../projects/RPMM0034/phenodata"
+    },
+    "RPMM0035": {
+      "directory": "../../projects/RPMM0035/phenodata"
+    },
+    "RPMM0036": {
+      "directory": "../../projects/RPMM0036/phenodata"
+    },
+    "RPMM0037": {
+      "directory": "../../projects/RPMM0037/phenodata"
+    },
+    "RPMM0040": {
+      "directory": "../../projects/RPMM0040/phenodata"
+    },
+    "RPMM0041": {
+      "directory": "../../projects/RPMM0041/phenodata"
+    },
+    "RPMM0042": {
+      "directory": "../../projects/RPMM0042/phenodata"
+    },
+    "RPMM0043": {
+      "directory": "../../projects/RPMM0043/phenodata"
+    },
+    "RPMM0044": {
+      "directory": "../../projects/RPMM0044/phenodata"
+    },
+    "RPMM0045": {
+      "directory": "../../projects/RPMM0045/phenodata"
+    },
+    "RPMM0046": {
+      "directory": "../../projects/RPMM0046/phenodata"
+    },
+    "RPMM0059": {
+      "directory": "../../projects/RPMM0059/phenodata"
+    },
+    "RPMM0060": {
+      "directory": "../../projects/RPMM0060/phenodata"
+    },
+    "RPMM0062": {
+      "directory": "../../projects/RPMM0062/phenodata"
+    },
+    "RPMM0063": {
+      "directory": "../../projects/RPMM0063/phenodata"
+    },
+    "RPMM0064": {
+      "directory": "../../projects/RPMM0064/phenodata"
+    },
+    "RPMM0067": {
+      "directory": "../../projects/RPMM0067/phenodata"
+    },
+    "RPMM0068": {
+      "directory": "../../projects/RPMM0068/phenodata"
+    }
+  }
+}

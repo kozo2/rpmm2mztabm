@@ -1,39 +1,77 @@
 #!/usr/bin/env python3
 """export_tables.py - per-matrix export of RPMM quantification data.
 
-For every quantification matrix under investigation/downloads/data, write:
+For every quantification matrix under projects/<RPMM_ID>/data, write:
 
-  investigation/tables/<RPMM_ID>/<RPMM_ID>_<MatrixName>.toml
+  projects/<RPMM_ID>/tables/<RPMM_ID>_<MatrixName>.toml
       sample metadata for the mzTab-M MTD table: project title, source file,
       organism, instrument hints, one entry per sample (assay, ms_run
       location, phenodata study variables).
 
-  investigation/tables/<RPMM_ID>/<RPMM_ID>_<MatrixName>.parquet
+  projects/<RPMM_ID>/tables/<RPMM_ID>_<MatrixName>.parquet
       per-metabolite quantification table for the mzTab-M SML table:
       annotation columns (feature id, chemical name, grade, RI/RT, m/z when
       present) + one abundance_<sample> column per sample.
 
 Fail-and-log policy: anything that cannot be determined from the data files
 (unknown organism, unmatched phenodata ids, unclassifiable columns) is
-recorded in investigation/tables/_curation.tsv - never invented.
+recorded in reports/tables/_curation.tsv - never invented.
 
 Usage: python3 investigation/export_tables.py [RPMM_ID ...]
 """
 
+import argparse
 import csv
 import datetime
 import math
 import os
 import re
 import sys
+from pathlib import Path
 import tomli_w
 
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-DATA = "investigation/downloads/data"
-OUT = "investigation/tables"
-PROJECTS_JSON = "investigation/projects.json"
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parent
+DATA = REPO / "projects"
+OUT = REPO / "projects"
+REPORTS = REPO / "reports" / "tables"
+PROJECTS_JSON = HERE / "projects.json"
+GENERATED_ON = datetime.date.today().isoformat()
+
+
+def project_data_dir(project):
+    """Physical source directory; project identity is independent of its location."""
+    return os.path.join(DATA, project, "data")
+
+
+def logical_path(path):
+    """Stable source key RPMM####/... (without the physical data/ container)."""
+    parts = Path(path).resolve().relative_to(Path(DATA).resolve()).parts
+    if len(parts) < 3 or parts[1] != "data":
+        raise ValueError(f"not a project data path: {path}")
+    return Path(parts[0], *parts[2:]).as_posix()
+
+
+def physical_path(logical):
+    """Resolve a recorded logical key under the selected projects root."""
+    parts = Path(logical).parts
+    if len(parts) < 2 or not re.fullmatch(r"RPMM\d+", parts[0]):
+        raise ValueError(f"invalid logical project source key: {logical}")
+    target = (Path(DATA) / parts[0] / "data" / Path(*parts[1:])).resolve()
+    target.relative_to(Path(project_data_dir(parts[0])).resolve())
+    return str(target)
+
+
+def output_reference(path):
+    """Portable repository-relative reference for ordinary output locations."""
+    resolved = Path(path).resolve()
+    try:
+        return resolved.relative_to(REPO).as_posix()
+    except ValueError:
+        return str(resolved)
 
 # ---------------------------------------------------------------------------
 # Text helpers (mirrors investigation/mztabm/lib/read_matrix.R rules)
@@ -275,7 +313,7 @@ def resolve_species(raw):
 
 def find_species_raw(matrix_dir, project_id, pdata):
     """Raw species string: MSP Synon:Species line, then phenodata columns."""
-    for root, _dirs, files in os.walk(os.path.join(DATA, project_id)):
+    for root, _dirs, files in os.walk(project_data_dir(project_id)):
         for fn in sorted(files):
             if "nist" in fn.lower() and fn.lower().endswith(".txt"):
                 try:
@@ -309,14 +347,14 @@ def inventory():
     matrices = []
     companions = {}
     for proj in sorted(os.listdir(DATA)):
-        pdir = os.path.join(DATA, proj)
+        pdir = project_data_dir(proj)
         if not os.path.isdir(pdir) or not proj.startswith("RPMM"):
             continue
         cands = []
         for root, _dirs, files in os.walk(pdir):
             for fn in sorted(files):
                 p = os.path.join(root, fn)
-                rel = os.path.relpath(p, DATA)
+                rel = logical_path(p)
                 if SKIP_RE.search(fn):
                     continue
                 if COMPANION_RE.search(fn) or re.search(r"alkane", fn, re.I):
@@ -352,7 +390,7 @@ def inventory():
             for p in group:
                 if p != chosen:
                     companions.setdefault(proj, []).append(
-                        os.path.relpath(p, DATA))
+                        logical_path(p))
     return matrices, companions
 
 
@@ -391,7 +429,7 @@ def pick_companion(rels, rel_src, predicate):
 def project_pheno_values(proj):
     """All values appearing in the project's phenodata files (sample-ID pool)."""
     vals = set()
-    for root, _dirs, files in os.walk(os.path.join(DATA, proj)):
+    for root, _dirs, files in os.walk(project_data_dir(proj)):
         for fn in sorted(files):
             if re.search(r"pheno", fn, re.I) and not re.search(r"\.xlsx?$|\.xls$", fn, re.I):
                 try:
@@ -527,16 +565,16 @@ def write_parquet(path, cols):
 def export_matrix(mx, title, species_raw, species_cv, species_src,
                   pheno_rel, msp_rel, out_dir, curate):
     stem = os.path.splitext(os.path.basename(mx["path"]))[0]
-    proj = os.path.relpath(mx["path"], DATA).split(os.sep)[0]
+    proj = logical_path(mx["path"]).split(os.sep)[0]
     base = f"{proj}_{stem}"
-    rel_src = os.path.relpath(mx["path"], DATA)
+    rel_src = logical_path(mx["path"])
     # provenance rows: every pair carries its source files into the log
     for kind, rel in (("source_matrix", rel_src),
                       ("source_phenodata", pheno_rel),
                       ("source_msp", msp_rel)):
         if rel:
             curate.append((proj, base, kind, rel))
-    pheno_path = os.path.join(DATA, pheno_rel) if pheno_rel else None
+    pheno_path = physical_path(pheno_rel) if pheno_rel else None
     pcols = read_phenodata(pheno_path) if pheno_path else None
     id_col, aligned = align_phenodata(pcols, mx["samples"]) if pcols else (None, {})
     if pcols and len(aligned) < 0.5 * len(mx["samples"]):
@@ -582,7 +620,7 @@ def export_matrix(mx, title, species_raw, species_cv, species_src,
     toml = {
         "schema_version": 1,
         "generated_by": "investigation/export_tables.py",
-        "generated_on": datetime.date.today().isoformat(),
+        "generated_on": GENERATED_ON,
         "mzd_table": "MTD",
         "project": {
             "id": proj,
@@ -599,7 +637,7 @@ def export_matrix(mx, title, species_raw, species_cv, species_src,
             "unclassified_columns": mx["unknown_columns"],
         },
         "companion_files": {
-            "phenodata": os.path.relpath(pheno_path, DATA) if pheno_path else "",
+            "phenodata": logical_path(pheno_path) if pheno_path else "",
             "msp": msp_rel or "",
         },
         "organism": {
@@ -632,9 +670,9 @@ def export_matrix(mx, title, species_raw, species_cv, species_src,
 
     return {
         "project": proj, "matrix": stem, "source": rel_src,
-        "toml": toml_path, "parquet": parq_path,
+        "toml": output_reference(toml_path), "parquet": output_reference(parq_path),
         "n_features": mx["n_rows"], "n_samples": len(mx["samples"]),
-        "phenodata": os.path.relpath(pheno_path, DATA) if pheno_path else "",
+        "phenodata": logical_path(pheno_path) if pheno_path else "",
         "id_col": id_col or "", "samples_matched": len(aligned),
         "species_cv": species_cv[1] if species_cv else "",
         "study_variables": ", ".join(groups),
@@ -642,23 +680,45 @@ def export_matrix(mx, title, species_raw, species_cv, species_src,
 
 
 def main():
-    only = [a for a in sys.argv[1:] if not a.startswith("-")]
-    os.makedirs(OUT, exist_ok=True)
+    global DATA, OUT, REPORTS, GENERATED_ON
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("projects", nargs="*", help="optional RPMM project IDs")
+    parser.add_argument("--projects-root", type=Path, default=REPO / "projects",
+                        help="root containing RPMM####/data input directories")
+    parser.add_argument("--output-root", type=Path,
+                        help="artifact root containing RPMM####/tables (default: projects root)")
+    parser.add_argument("--reports-root", type=Path,
+                        help="global report directory (default: reports/tables; explicit for subsets)")
+    parser.add_argument("--generated-on", help="ISO date for reproducible TOML metadata")
+    args = parser.parse_args()
+    DATA = args.projects_root.resolve()
+    OUT = (args.output_root or DATA).resolve()
+    REPORTS = (args.reports_root or REPO / "reports" / "tables").resolve()
+    if args.projects and args.reports_root is None:
+        parser.error("Project subsets require --reports-root so they cannot replace full reports")
+    date = args.generated_on
+    if date is None and os.environ.get("SOURCE_DATE_EPOCH"):
+        date = datetime.datetime.fromtimestamp(int(os.environ["SOURCE_DATE_EPOCH"]),
+                                               datetime.timezone.utc).date().isoformat()
+    if date is not None:
+        GENERATED_ON = datetime.date.fromisoformat(date).isoformat()
+    only = args.projects
+    os.makedirs(REPORTS, exist_ok=True)
     titles = project_titles()
     matrices, companions = inventory()
     if only:
         matrices = [m for m in matrices
-                    if os.path.relpath(m, DATA).split(os.sep)[0] in only]
+                    if logical_path(m).split(os.sep)[0] in only]
     print(f"inventory: {len(matrices)} matrices over "
-          f"{len({os.path.relpath(m, DATA).split(os.sep)[0] for m in matrices})} projects")
+          f"{len({logical_path(m).split(os.sep)[0] for m in matrices})} projects")
 
     curate, report = [], []
     errors = []
     for m in sorted(matrices):
-        proj = os.path.relpath(m, DATA).split(os.sep)[0]
+        proj = logical_path(m).split(os.sep)[0]
         try:
             mx = read_matrix(m)
-            rel_src = os.path.relpath(m, DATA)
+            rel_src = logical_path(m)
             rels = companions.get(proj, [])
             pheno_rel = pick_companion(
                 rels, rel_src,
@@ -668,19 +728,19 @@ def main():
                 lambda r: bool(re.search(r"nist", os.path.basename(r), re.I))
                 and r.lower().endswith(".txt"))
             try:
-                pcols_probe = (read_phenodata(os.path.join(DATA, pheno_rel))
+                pcols_probe = (read_phenodata(physical_path(pheno_rel))
                                if pheno_rel else None)
             except Exception:
                 pcols_probe = None
             # guard: sample-metadata tables (run-order workbooks etc.) are not
             # per-metabolite quantification -> companion, not an export
             if looks_like_sample_metadata(mx, project_pheno_values(proj)):
-                companions.setdefault(proj, []).append(os.path.relpath(m, DATA))
+                companions.setdefault(proj, []).append(logical_path(m))
                 curate.append((proj, os.path.basename(m),
                                "sample_metadata_table_skipped",
                                "rows describe samples (match project sample IDs), "
                                "no metabolite/feature annotation; exported nowhere"))
-                print(f"  skip {os.path.relpath(m, DATA)}  (sample metadata table)")
+                print(f"  skip {logical_path(m)}  (sample metadata table)")
                 continue
             raw, src = find_species_raw(os.path.dirname(m), proj, pcols_probe)
             cv = resolve_species(raw) if raw else None
@@ -691,7 +751,7 @@ def main():
             if not raw:
                 curate.append((proj, os.path.basename(m), "species_missing",
                                "no species string in MSP or phenodata"))
-            out_dir = os.path.join(OUT, proj)
+            out_dir = os.path.join(OUT, proj, "tables")
             os.makedirs(out_dir, exist_ok=True)
             rep = export_matrix(mx, titles.get(proj, ""), raw,
                                 cv, src, pheno_rel, msp_rel, out_dir, curate)
@@ -699,11 +759,11 @@ def main():
             print(f"  ok  {rep['source']}  ({rep['n_features']} features x "
                   f"{rep['n_samples']} samples)")
         except Exception as e:
-            errors.append((proj, os.path.relpath(m, DATA), str(e)))
+            errors.append((proj, logical_path(m), str(e)))
             curate.append((proj, os.path.basename(m), "conversion_failed", str(e)))
-            print(f"  ERR {os.path.relpath(m, DATA)}: {e}")
+            print(f"  ERR {logical_path(m)}: {e}")
 
-    rep_path = os.path.join(OUT, "_report.tsv")
+    rep_path = os.path.join(REPORTS, "_report.tsv")
     fields = ["project", "matrix", "source", "toml", "parquet", "n_features",
               "n_samples", "phenodata", "id_col", "samples_matched",
               "species_cv", "study_variables"]
@@ -711,7 +771,7 @@ def main():
         w = csv.DictWriter(f, fieldnames=fields, delimiter="\t")
         w.writeheader()
         w.writerows(report)
-    cur_path = os.path.join(OUT, "_curation.tsv")
+    cur_path = os.path.join(REPORTS, "_curation.tsv")
     with open(cur_path, "w", newline="") as f:
         w = csv.writer(f, delimiter="\t")
         w.writerow(["project", "subject", "issue", "detail"])

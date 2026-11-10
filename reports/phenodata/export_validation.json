@@ -1,0 +1,19 @@
+{
+  "validation": "passed",
+  "source_cells_checked": 26997,
+  "source_records_checked": 2606,
+  "column_instances_checked": 391,
+  "value_mappings_checked": 11784,
+  "project_exports_checked": 31,
+  "validator_sha256": "47b1cb54a5bd0331bf53106a5d8f07b303db4c9cf403a4b0db3ee71506098e7a",
+  "checks": [
+    "TSV round-trip raw values and multiline headers",
+    "complete unique cell coordinates",
+    "original source hashes and physical lines",
+    "saved value dictionary expansion",
+    "all assigned ontology IDs current and verified",
+    "review candidates not assigned",
+    "rule and vocabulary hashes match the export",
+    "project exports equal their aggregate subsets"
+  ]
+}

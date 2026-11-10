@@ -1,0 +1,12 @@
+semantic_role	cells	unique_value_mappings	cells_needing_review	cells_with_assigned_term	cells_with_assigned_unit	values_with_assigned_term	values_with_assigned_unit
+count	96	6	0	0	0	0	0
+file_reference	48	48	0	0	0	0	0
+genotype	48	7	0	0	0	0	0
+group	48	14	0	0	0	0	0
+identifier	240	159	0	0	0	0	0
+order	96	49	0	0	0	0	0
+organism	48	1	0	48	0	1	0
+organism_part	48	1	0	48	0	1	0
+quantity	288	196	192	0	96	0	15
+text	48	1	0	0	0	0	0
+treatment	48	2	0	24	0	1	0

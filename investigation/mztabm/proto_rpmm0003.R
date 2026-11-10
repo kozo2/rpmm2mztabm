@@ -4,7 +4,22 @@ suppressMessages({
   library(SummarizedExperiment)
 })
 
-base <- "investigation/downloads/data/RPMM0003/AnalysedDataset"
+## Resolve paths from the script, independently of the shell's working directory.
+script_flag <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
+if (length(script_flag) != 1L) {
+  stop("Run this prototype with Rscript so its repository can be located.")
+}
+script_dir <- dirname(normalizePath(sub("^--file=", "", script_flag)))
+repo_root <- normalizePath(file.path(script_dir, "..", ".."))
+args <- commandArgs(trailingOnly = TRUE)
+option <- function(name, default) {
+  found <- which(args == name)
+  if (!length(found)) return(default)
+  if (length(found) != 1L || found + 1L > length(args)) stop("Invalid option: ", name)
+  args[found + 1L]
+}
+projects_root <- option("--projects-root", file.path(repo_root, "projects"))
+base <- file.path(projects_root, "RPMM0003", "data", "AnalysedDataset")
 
 raw <- readLines(file.path(base, "MetMat_abs.txt"), n = 40)
 hdr <- strsplit(raw[1], "\t", fixed = TRUE)[[1]]
@@ -165,17 +180,28 @@ sml <- smlAddStudyVariableColumns(sml, mtd(mt0))
 mt <- MzTabM(mtd = mtd(mt0), sml = sml, smf = smf, sme = sme)
 cat("profile:", getMtdField(mtd(mt), "mzTab-profile"), "\n")
 
-out <- "investigation/downloads/mztabm/RPMM0003/RPMM0003_MetMat_abs.mztab"
+out <- option("--output", file.path(projects_root, "RPMM0003", "mztabm", "RPMM0003_MetMat_abs.mztab"))
 dir.create(dirname(out), recursive = TRUE, showWarnings = FALSE)
 res <- try(writeMzTabM(mt, out, validate = FALSE))
 cat("writeMzTabM done\n")
 
 ## Run the official validator manually to see full messages with line numbers
-vpath <- "/Users/knishida/Library/Caches/org.R-project.R/R/BiocFileCache/8be021b8c274_jmztabm-validator-aarch64-macos"
-vr <- system2(vpath, c("-c", out), stdout = TRUE, stderr = TRUE)
+vpath <- option("--validator", Sys.getenv("RPMM_MZTABM_VALIDATOR", ""))
+if (!nzchar(vpath)) {
+  cached <- list.files(path.expand("~/Library/Caches/org.R-project.R/R/BiocFileCache"),
+                       pattern = "jmztabm-validator.*macos$", full.names = TRUE)
+  if (length(cached)) vpath <- sort(cached)[1L]
+}
+if (!nzchar(vpath) || !file.exists(vpath)) {
+  stop("Set --validator or RPMM_MZTABM_VALIDATOR to the jmztabm validator executable.")
+}
+vr <- system2(vpath, c("-c", shQuote(out)), stdout = TRUE, stderr = TRUE)
+if (!is.null(attr(vr, "status")) && attr(vr, "status") != 0L) stop("jmztabm validation failed")
 cat(tail(vr, 80), sep = "\n")
 
-back <- readMzTabM(out)
+## The official validator already ran above. Avoid its second implicit run,
+## which would reopen the user's BiocFileCache just to obtain the executable.
+back <- readMzTabM(out, validate = FALSE)
 ## NOTE: makeSummarizedExperimentFromMzTabM has a read-side bug: data.frame()
 ## mangles '#' in ms_run-location-derived colnames (make.names), so the SE
 ## round-trip fails on fragment URIs. QA therefore compares sections directly.
