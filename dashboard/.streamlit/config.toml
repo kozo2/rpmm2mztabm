@@ -1,0 +1,20 @@
+[server]
+headless = true
+port = 8510
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "light"
+primaryColor = "#21634d"
+backgroundColor = "#f8f8f4"
+secondaryBackgroundColor = "#eeeee8"
+textColor = "#20352d"
+borderColor = "#d9ddd2"
+font = "sans-serif"
+showSidebarBorder = true
+
+[theme.sidebar]
+backgroundColor = "#eff1e9"
+secondaryBackgroundColor = "#ffffff"

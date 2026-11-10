@@ -29,6 +29,19 @@ investigation/            # 再生成スクリプト、取得記録、辞書、�
 `projects/RPMM0003/data/AnalysedDataset/phenodata.csv` にあります。
 論理キーを維持することで、セルID・対応表ID・出典参照を保っています。
 
+## Dashboard
+
+[Phenodata Atlas](dashboard/README.md) でプロジェクト別の列・オントロジー・値を探索できます。
+Streamlit アプリは `dashboard/` にあり、`reports/phenodata/column_mappings.tsv` と対応する値のレポートから
+再現可能なデータスナップショットを生成します。
+
+```sh
+cd dashboard
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/streamlit run app.py
+```
+
 ## Phenodata 注釈の再生成
 
 Python 3.9以降の標準ライブラリだけで実行でき、通常の生成では通信しません。

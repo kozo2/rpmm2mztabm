@@ -1,0 +1,2 @@
+# Tested Streamlit/Pandas/Altair environment, including transitive dependencies.
+-r requirements.lock.txt
