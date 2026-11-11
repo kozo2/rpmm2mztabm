@@ -1,0 +1,7 @@
+project	matrix	family	out	status	n_features	n_samples	n_dropped	qa	note
+RPMM0003	RPMM0003/AnalysedDataset/CRMN_normalized.txt	gcms_mcr	investigation/downloads/mztabm/RPMM0003/RPMM0003_CRMN_normalized.mztab	failed	NA	NA	NA		mzTab validation failed: mzTab validation failed: 1 error(s) found.
+Metadata define label "external_study[1]" can not be recognized.
+RPMM0003	RPMM0003/AnalysedDataset/MetMat_abs.txt	gcms_mcr	investigation/downloads/mztabm/RPMM0003/RPMM0003_MetMat_abs.mztab	failed	NA	NA	NA		mzTab validation failed: mzTab validation failed: 1 error(s) found.
+Metadata define label "external_study[1]" can not be recognized.
+RPMM0003	RPMM0003/AnalysedDataset/one_normalized.txt	gcms_mcr	investigation/downloads/mztabm/RPMM0003/RPMM0003_one_normalized.mztab	failed	NA	NA	NA		mzTab validation failed: mzTab validation failed: 1 error(s) found.
+Metadata define label "external_study[1]" can not be recognized.
